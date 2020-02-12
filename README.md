@@ -63,3 +63,36 @@ Build and run service:
 ```
 micro run service
 ```
+
+Kubernetes commands
+```
+kc get services
+kc get pods
+kc describe deployments
+kubectl describe pods {my-pod}
+```
+More: https://kubernetes.io/docs/reference/kubectl/cheatsheet
+
+## Local kubernetes deployment:
+Install etcd:
+```
+helm install go-micro-gorm --set customResources.createEtcdClusterCRD=true stable/etcd-operator
+```
+
+To later uninstall etcd:
+```
+helm delete go-micro-gorm
+```
+
+Install NATS:
+```
+kubectl apply -f https://github.com/nats-io/nats-operator/releases/latest/download/00-prereqs.yaml
+```
+```
+kubectl apply -f https://github.com/nats-io/nats-operator/releases/latest/download/10-deployment.yaml
+```
+
+Apply/deploy:
+```
+kubectl apply -f k8s/deploy.yaml
+```

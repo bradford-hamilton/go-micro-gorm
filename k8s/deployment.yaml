@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: go-micro-gorm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: go-micro-gorm-srv
+      micro: service
+  template:
+    metadata:
+      labels:
+        name: go-micro-gorm-srv
+        micro: service
+    spec:
+      containers:
+        - name: go-micro-gorm
+          command: ["/go-micro-gorm"]
+          image: bradfordhamilton/go-micro-gorm:e96ca174f14fb9cfe05596b3db7014fcb52136be
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8080
+            name: gmg-port
+          env:
+          - name: MICRO_SERVER_ADDRESS
+            value: "0.0.0.0:8080"
+          - name: MICRO_BROKER
+            value: "nats"
+          - name: MICRO_BROKER_ADDRESS
+            value: "nats-cluster"
+          - name: MICRO_REGISTRY
+            value: "etcd"
+          - name: MICRO_REGISTRY_ADDRESS
+            value: "etcd-cluster-client"

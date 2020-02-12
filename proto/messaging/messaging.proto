@@ -2,8 +2,9 @@ syntax = "proto3";
 
 package proto.messaging;
 
-service Messaging {
+service MessagingService {
 	rpc Call(MessagingRequest) returns (MessagingResponse) {}
+	rpc List(MessagingListRequest) returns (MessagingListResponse) {}
 	rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
 	rpc PingPong(stream Ping) returns (stream Pong) {}
 }
@@ -18,6 +19,20 @@ message MessagingRequest {
 
 message MessagingResponse {
 	string msg = 1;
+}
+
+message MessagingListRequest {
+	MessagingListType message_type = 1; 	
+}
+
+message MessagingListResponse {
+	string messages = 1;
+}
+
+enum MessagingListType {
+	Default = 0;
+	Short = 1;
+	Long = 2;
 }
 
 message StreamingRequest {

@@ -31,12 +31,13 @@ var _ context.Context
 var _ client.Option
 var _ server.Option
 
-// Client API for Messaging service
+// Client API for MessagingService service
 
 type MessagingService interface {
 	Call(ctx context.Context, in *MessagingRequest, opts ...client.CallOption) (*MessagingResponse, error)
-	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (Messaging_StreamService, error)
-	PingPong(ctx context.Context, opts ...client.CallOption) (Messaging_PingPongService, error)
+	List(ctx context.Context, in *MessagingListRequest, opts ...client.CallOption) (*MessagingListResponse, error)
+	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (MessagingService_StreamService, error)
+	PingPong(ctx context.Context, opts ...client.CallOption) (MessagingService_PingPongService, error)
 }
 
 type messagingService struct {
@@ -52,7 +53,7 @@ func NewMessagingService(name string, c client.Client) MessagingService {
 }
 
 func (c *messagingService) Call(ctx context.Context, in *MessagingRequest, opts ...client.CallOption) (*MessagingResponse, error) {
-	req := c.c.NewRequest(c.name, "Messaging.Call", in)
+	req := c.c.NewRequest(c.name, "MessagingService.Call", in)
 	out := new(MessagingResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -61,8 +62,18 @@ func (c *messagingService) Call(ctx context.Context, in *MessagingRequest, opts 
 	return out, nil
 }
 
-func (c *messagingService) Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (Messaging_StreamService, error) {
-	req := c.c.NewRequest(c.name, "Messaging.Stream", &StreamingRequest{})
+func (c *messagingService) List(ctx context.Context, in *MessagingListRequest, opts ...client.CallOption) (*MessagingListResponse, error) {
+	req := c.c.NewRequest(c.name, "MessagingService.List", in)
+	out := new(MessagingListResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messagingService) Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (MessagingService_StreamService, error) {
+	req := c.c.NewRequest(c.name, "MessagingService.Stream", &StreamingRequest{})
 	stream, err := c.c.Stream(ctx, req, opts...)
 	if err != nil {
 		return nil, err
@@ -73,7 +84,7 @@ func (c *messagingService) Stream(ctx context.Context, in *StreamingRequest, opt
 	return &messagingServiceStream{stream}, nil
 }
 
-type Messaging_StreamService interface {
+type MessagingService_StreamService interface {
 	Context() context.Context
 	SendMsg(interface{}) error
 	RecvMsg(interface{}) error
@@ -110,8 +121,8 @@ func (x *messagingServiceStream) Recv() (*StreamingResponse, error) {
 	return m, nil
 }
 
-func (c *messagingService) PingPong(ctx context.Context, opts ...client.CallOption) (Messaging_PingPongService, error) {
-	req := c.c.NewRequest(c.name, "Messaging.PingPong", &Ping{})
+func (c *messagingService) PingPong(ctx context.Context, opts ...client.CallOption) (MessagingService_PingPongService, error) {
+	req := c.c.NewRequest(c.name, "MessagingService.PingPong", &Ping{})
 	stream, err := c.c.Stream(ctx, req, opts...)
 	if err != nil {
 		return nil, err
@@ -119,7 +130,7 @@ func (c *messagingService) PingPong(ctx context.Context, opts ...client.CallOpti
 	return &messagingServicePingPong{stream}, nil
 }
 
-type Messaging_PingPongService interface {
+type MessagingService_PingPongService interface {
 	Context() context.Context
 	SendMsg(interface{}) error
 	RecvMsg(interface{}) error
@@ -161,44 +172,50 @@ func (x *messagingServicePingPong) Recv() (*Pong, error) {
 	return m, nil
 }
 
-// Server API for Messaging service
+// Server API for MessagingService service
 
-type MessagingHandler interface {
+type MessagingServiceHandler interface {
 	Call(context.Context, *MessagingRequest, *MessagingResponse) error
-	Stream(context.Context, *StreamingRequest, Messaging_StreamStream) error
-	PingPong(context.Context, Messaging_PingPongStream) error
+	List(context.Context, *MessagingListRequest, *MessagingListResponse) error
+	Stream(context.Context, *StreamingRequest, MessagingService_StreamStream) error
+	PingPong(context.Context, MessagingService_PingPongStream) error
 }
 
-func RegisterMessagingHandler(s server.Server, hdlr MessagingHandler, opts ...server.HandlerOption) error {
-	type messaging interface {
+func RegisterMessagingServiceHandler(s server.Server, hdlr MessagingServiceHandler, opts ...server.HandlerOption) error {
+	type messagingService interface {
 		Call(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error
+		List(ctx context.Context, in *MessagingListRequest, out *MessagingListResponse) error
 		Stream(ctx context.Context, stream server.Stream) error
 		PingPong(ctx context.Context, stream server.Stream) error
 	}
-	type Messaging struct {
-		messaging
+	type MessagingService struct {
+		messagingService
 	}
-	h := &messagingHandler{hdlr}
-	return s.Handle(s.NewHandler(&Messaging{h}, opts...))
+	h := &messagingServiceHandler{hdlr}
+	return s.Handle(s.NewHandler(&MessagingService{h}, opts...))
 }
 
-type messagingHandler struct {
-	MessagingHandler
+type messagingServiceHandler struct {
+	MessagingServiceHandler
 }
 
-func (h *messagingHandler) Call(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error {
-	return h.MessagingHandler.Call(ctx, in, out)
+func (h *messagingServiceHandler) Call(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error {
+	return h.MessagingServiceHandler.Call(ctx, in, out)
 }
 
-func (h *messagingHandler) Stream(ctx context.Context, stream server.Stream) error {
+func (h *messagingServiceHandler) List(ctx context.Context, in *MessagingListRequest, out *MessagingListResponse) error {
+	return h.MessagingServiceHandler.List(ctx, in, out)
+}
+
+func (h *messagingServiceHandler) Stream(ctx context.Context, stream server.Stream) error {
 	m := new(StreamingRequest)
 	if err := stream.Recv(m); err != nil {
 		return err
 	}
-	return h.MessagingHandler.Stream(ctx, m, &messagingStreamStream{stream})
+	return h.MessagingServiceHandler.Stream(ctx, m, &messagingServiceStreamStream{stream})
 }
 
-type Messaging_StreamStream interface {
+type MessagingService_StreamStream interface {
 	Context() context.Context
 	SendMsg(interface{}) error
 	RecvMsg(interface{}) error
@@ -206,35 +223,35 @@ type Messaging_StreamStream interface {
 	Send(*StreamingResponse) error
 }
 
-type messagingStreamStream struct {
+type messagingServiceStreamStream struct {
 	stream server.Stream
 }
 
-func (x *messagingStreamStream) Close() error {
+func (x *messagingServiceStreamStream) Close() error {
 	return x.stream.Close()
 }
 
-func (x *messagingStreamStream) Context() context.Context {
+func (x *messagingServiceStreamStream) Context() context.Context {
 	return x.stream.Context()
 }
 
-func (x *messagingStreamStream) SendMsg(m interface{}) error {
+func (x *messagingServiceStreamStream) SendMsg(m interface{}) error {
 	return x.stream.Send(m)
 }
 
-func (x *messagingStreamStream) RecvMsg(m interface{}) error {
+func (x *messagingServiceStreamStream) RecvMsg(m interface{}) error {
 	return x.stream.Recv(m)
 }
 
-func (x *messagingStreamStream) Send(m *StreamingResponse) error {
+func (x *messagingServiceStreamStream) Send(m *StreamingResponse) error {
 	return x.stream.Send(m)
 }
 
-func (h *messagingHandler) PingPong(ctx context.Context, stream server.Stream) error {
-	return h.MessagingHandler.PingPong(ctx, &messagingPingPongStream{stream})
+func (h *messagingServiceHandler) PingPong(ctx context.Context, stream server.Stream) error {
+	return h.MessagingServiceHandler.PingPong(ctx, &messagingServicePingPongStream{stream})
 }
 
-type Messaging_PingPongStream interface {
+type MessagingService_PingPongStream interface {
 	Context() context.Context
 	SendMsg(interface{}) error
 	RecvMsg(interface{}) error
@@ -243,31 +260,31 @@ type Messaging_PingPongStream interface {
 	Recv() (*Ping, error)
 }
 
-type messagingPingPongStream struct {
+type messagingServicePingPongStream struct {
 	stream server.Stream
 }
 
-func (x *messagingPingPongStream) Close() error {
+func (x *messagingServicePingPongStream) Close() error {
 	return x.stream.Close()
 }
 
-func (x *messagingPingPongStream) Context() context.Context {
+func (x *messagingServicePingPongStream) Context() context.Context {
 	return x.stream.Context()
 }
 
-func (x *messagingPingPongStream) SendMsg(m interface{}) error {
+func (x *messagingServicePingPongStream) SendMsg(m interface{}) error {
 	return x.stream.Send(m)
 }
 
-func (x *messagingPingPongStream) RecvMsg(m interface{}) error {
+func (x *messagingServicePingPongStream) RecvMsg(m interface{}) error {
 	return x.stream.Recv(m)
 }
 
-func (x *messagingPingPongStream) Send(m *Pong) error {
+func (x *messagingServicePingPongStream) Send(m *Pong) error {
 	return x.stream.Send(m)
 }
 
-func (x *messagingPingPongStream) Recv() (*Ping, error) {
+func (x *messagingServicePingPongStream) Recv() (*Ping, error) {
 	m := new(Ping)
 	if err := x.stream.Recv(m); err != nil {
 		return nil, err

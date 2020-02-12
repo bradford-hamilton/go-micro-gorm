@@ -17,9 +17,14 @@ test:
 	go test -v ./... -cover
 
 .PHONY: docker
-docker:
+docker: build-linux
 	docker build . -t bradfordhamilton/go-micro-gorm:latest
 	docker tag bradfordhamilton/go-micro-gorm:latest bradfordhamilton/go-micro-gorm:$(shell git rev-parse HEAD)
+	docker push bradfordhamilton/go-micro-gorm:latest
 	docker push bradfordhamilton/go-micro-gorm:$(shell git rev-parse HEAD)
 	docker rmi bradfordhamilton/go-micro-gorm:$(shell git rev-parse HEAD)
 	echo 'sha for deployment.yaml: $(shell git rev-parse HEAD)'
+
+.PHONY: deploy
+deploy:
+	GO_MICRO_GORM_SHA=$(shell git rev-parse HEAD) kubectl apply -f k8s/deployment.yaml

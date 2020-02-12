@@ -1,4 +1,4 @@
-# Go Service
+# Go Micro Gorm
 Generated with
 
 ```

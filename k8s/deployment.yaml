@@ -18,7 +18,7 @@ spec:
       containers:
         - name: go-micro-gorm
           command: ["/go-micro-gorm"]
-          image: bradfordhamilton/go-micro-gorm:e96ca174f14fb9cfe05596b3db7014fcb52136be
+          image: bradfordhamilton/go-micro-gorm:${GO_MICRO_GORM_SHA}
           imagePullPolicy: Always
           ports:
           - containerPort: 8080

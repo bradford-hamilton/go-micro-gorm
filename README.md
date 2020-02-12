@@ -28,7 +28,11 @@ A Makefile is included for convenience
 Build the binary
 
 ```
-make build
+make build-mac
+```
+or
+```
+make build-linux
 ```
 
 Run the service
@@ -36,7 +40,7 @@ Run the service
 ./go-micro-gorm
 ```
 
-Build a docker image
+Build, tag, and push docker images with sha and latest tags
 ```
 make docker
 ```

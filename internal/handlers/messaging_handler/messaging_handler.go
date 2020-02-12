@@ -17,14 +17,22 @@ type Messaging struct {
 }
 
 // Call is a single request handler called via client.Call or the generated client code
-func (m *Messaging) Call(ctx context.Context, req *proto_messaging.MessagingRequest, res *proto_messaging.MessagingResponse) error {
+func (m *Messaging) Call(
+	ctx context.Context,
+	req *proto_messaging.MessagingRequest,
+	res *proto_messaging.MessagingResponse,
+) error {
 	log.Log("Received Messaging.Call request")
 	res.Msg = fmt.Sprintf("Hey there %s", req.Name)
 	return nil
 }
 
 // List all messages - currently takes a "message_type" and filters by that enum
-func (m *Messaging) List(ctx context.Context, req *proto_messaging.MessagingListRequest, res *proto_messaging.MessagingListResponse) error {
+func (m *Messaging) List(
+	ctx context.Context,
+	req *proto_messaging.MessagingListRequest,
+	res *proto_messaging.MessagingListResponse,
+) error {
 	log.Log("Received Messaging.List request")
 
 	// Create a slice of db.Message for gorm to use
@@ -48,9 +56,14 @@ func (m *Messaging) List(ctx context.Context, req *proto_messaging.MessagingList
 }
 
 // Stream is a server side stream handler called via client.Stream or the generated client code
-func (m *Messaging) Stream(ctx context.Context, req *proto_messaging.StreamingRequest, stream proto_messaging.MessagingService_StreamStream) error {
+func (m *Messaging) Stream(
+	ctx context.Context,
+	req *proto_messaging.StreamingRequest,
+	stream proto_messaging.MessagingService_StreamStream,
+) error {
 	log.Logf("Received Messaging.Stream request with count: %d", req.Count)
 
+	// Loop over the request's Count and send that `n` number of messages back through the stream with a Count of i
 	for i := 0; i < int(req.Count); i++ {
 		log.Logf("Responding: %d", i)
 		if err := stream.Send(&proto_messaging.StreamingResponse{
@@ -65,6 +78,7 @@ func (m *Messaging) Stream(ctx context.Context, req *proto_messaging.StreamingRe
 
 // PingPong is a bidirectional stream handler called via client.Stream or the generated client code
 func (m *Messaging) PingPong(ctx context.Context, stream proto_messaging.MessagingService_PingPongStream) error {
+	// Continuously send & receive from the stream
 	for {
 		req, err := stream.Recv()
 		if err != nil {

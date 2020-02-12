@@ -30,9 +30,9 @@ message MessagingListResponse {
 }
 
 enum MessagingListType {
-	Default = 0;
-	Short = 1;
-	Long = 2;
+	Public = 0;
+	Private = 1;
+	Protected = 2;
 }
 
 message StreamingRequest {

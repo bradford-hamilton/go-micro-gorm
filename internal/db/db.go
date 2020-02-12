@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/jinzhu/gorm"
+
+	// Needed for side effects (pg driver)
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
@@ -48,13 +50,21 @@ func New() (*gorm.DB, error) {
 	// Migrate the schema
 	db.AutoMigrate(&Message{})
 
-	// Seed some records
-	db.Create(&Message{MsgType: "Default", Msg: "Hey, I'm a default message"})
-	db.Create(&Message{MsgType: "Default", Msg: "Hey, I'm another default message"})
-	db.Create(&Message{MsgType: "Short", Msg: "Hey, I'm a short message"})
-	db.Create(&Message{MsgType: "Short", Msg: "Hey, I'm another short message"})
-	db.Create(&Message{MsgType: "Long", Msg: "Hey, I'm a long message"})
-	db.Create(&Message{MsgType: "Long", Msg: "Hey, I'm another long message"})
+	// Seed the db when in development
+	if env := os.Getenv("GO_MICRO_GORM_ENV"); env == "development" {
+		// Seed database with some records in development
+		seedDatabase(db)
+	}
 
 	return db, nil
+}
+
+// Seed the db with message records
+func seedDatabase(db *gorm.DB) {
+	db.Create(&Message{MsgType: "Public", Msg: "Hey, I'm a public message!"})
+	db.Create(&Message{MsgType: "Public", Msg: "I'm another public message."})
+	db.Create(&Message{MsgType: "Private", Msg: "Hey, I'm a private message!"})
+	db.Create(&Message{MsgType: "Private", Msg: "I'm another private message."})
+	db.Create(&Message{MsgType: "Protected", Msg: "Hey, I'm a protected message!"})
+	db.Create(&Message{MsgType: "Protected", Msg: "I'm another protected message."})
 }

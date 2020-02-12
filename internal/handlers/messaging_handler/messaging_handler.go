@@ -2,10 +2,10 @@ package messaginghandler
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/bradford-hamilton/go-micro-gorm/internal/db"
+	"github.com/bradford-hamilton/go-micro-gorm/pkg/json"
 	proto_messaging "github.com/bradford-hamilton/go-micro-gorm/proto/messaging"
 	"github.com/jinzhu/gorm"
 	"github.com/micro/go-micro/v2/util/log"
@@ -36,7 +36,7 @@ func (m *Messaging) List(ctx context.Context, req *proto_messaging.MessagingList
 		Find(&Messages)
 
 	// Attmpt to marshall the Messages into bytes
-	msgBytes, err := json.Marshal(&Messages)
+	msgBytes, err := json.API.Marshal(&Messages)
 	if err != nil {
 		log.Errorf("Error marshalling json in List endpoint: %v", err)
 	}

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/bradford-hamilton/go-micro-gorm/interal/db"
+	"github.com/bradford-hamilton/go-micro-gorm/internal/db"
 	messaginghandler "github.com/bradford-hamilton/go-micro-gorm/internal/handlers/messaging_handler"
 	messagingsubscriber "github.com/bradford-hamilton/go-micro-gorm/internal/subscribers/messaging_subscriber"
 	proto_messaging "github.com/bradford-hamilton/go-micro-gorm/proto/messaging"

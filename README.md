@@ -25,17 +25,22 @@ Micro services depend on service discovery. The default is multicast DNS, a zero
 
 A Makefile is included for convenience
 
-Build the binary
+Run your service for development:
+```
+make run
+```
 
+Build the binary
 ```
 make build-mac
 ```
+
 or
 ```
 make build-linux
 ```
 
-Run the service
+Start it up
 ```
 ./go-micro-gorm
 ```

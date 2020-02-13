@@ -36,6 +36,7 @@ var _ server.Option
 type MessagingService interface {
 	Call(ctx context.Context, in *MessagingRequest, opts ...client.CallOption) (*MessagingResponse, error)
 	List(ctx context.Context, in *MessagingListRequest, opts ...client.CallOption) (*MessagingListResponse, error)
+	DestroyByID(ctx context.Context, in *MessagingRequest, opts ...client.CallOption) (*MessagingResponse, error)
 	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (MessagingService_StreamService, error)
 	PingPong(ctx context.Context, opts ...client.CallOption) (MessagingService_PingPongService, error)
 }
@@ -65,6 +66,16 @@ func (c *messagingService) Call(ctx context.Context, in *MessagingRequest, opts 
 func (c *messagingService) List(ctx context.Context, in *MessagingListRequest, opts ...client.CallOption) (*MessagingListResponse, error) {
 	req := c.c.NewRequest(c.name, "MessagingService.List", in)
 	out := new(MessagingListResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messagingService) DestroyByID(ctx context.Context, in *MessagingRequest, opts ...client.CallOption) (*MessagingResponse, error) {
+	req := c.c.NewRequest(c.name, "MessagingService.DestroyByID", in)
+	out := new(MessagingResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -177,6 +188,7 @@ func (x *messagingServicePingPong) Recv() (*Pong, error) {
 type MessagingServiceHandler interface {
 	Call(context.Context, *MessagingRequest, *MessagingResponse) error
 	List(context.Context, *MessagingListRequest, *MessagingListResponse) error
+	DestroyByID(context.Context, *MessagingRequest, *MessagingResponse) error
 	Stream(context.Context, *StreamingRequest, MessagingService_StreamStream) error
 	PingPong(context.Context, MessagingService_PingPongStream) error
 }
@@ -185,6 +197,7 @@ func RegisterMessagingServiceHandler(s server.Server, hdlr MessagingServiceHandl
 	type messagingService interface {
 		Call(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error
 		List(ctx context.Context, in *MessagingListRequest, out *MessagingListResponse) error
+		DestroyByID(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error
 		Stream(ctx context.Context, stream server.Stream) error
 		PingPong(ctx context.Context, stream server.Stream) error
 	}
@@ -205,6 +218,10 @@ func (h *messagingServiceHandler) Call(ctx context.Context, in *MessagingRequest
 
 func (h *messagingServiceHandler) List(ctx context.Context, in *MessagingListRequest, out *MessagingListResponse) error {
 	return h.MessagingServiceHandler.List(ctx, in, out)
+}
+
+func (h *messagingServiceHandler) DestroyByID(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error {
+	return h.MessagingServiceHandler.DestroyByID(ctx, in, out)
 }
 
 func (h *messagingServiceHandler) Stream(ctx context.Context, stream server.Stream) error {

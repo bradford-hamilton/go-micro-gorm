@@ -2,7 +2,7 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: run
 run:
-	GO_MICRO_GORM_ENV=development go run main.go
+	GO_MICRO_GORM_ENV=development micro run service
 
 .PHONY: proto
 proto:

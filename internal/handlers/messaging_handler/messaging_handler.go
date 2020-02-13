@@ -3,6 +3,7 @@ package messaginghandler
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/bradford-hamilton/go-micro-gorm/internal/db"
 	"github.com/bradford-hamilton/go-micro-gorm/pkg/json"
@@ -39,18 +40,46 @@ func (m *Messaging) List(
 	Messages := []db.Message{}
 
 	// Query our db for any messages where MsgType == the request's asked MsgType
-	m.Db.
+	if errs := m.
+		Db.
 		Where(&db.Message{MsgType: req.GetMessageType().String()}).
-		Find(&Messages)
+		Find(&Messages).
+		GetErrors(); len(errs) > 0 {
+		res.Errors = errSliceToString(errs)
+		return nil
+	}
 
 	// Attmpt to marshall the Messages into bytes
 	msgBytes, err := json.API.Marshal(&Messages)
 	if err != nil {
 		log.Errorf("Error marshalling json in List endpoint: %v", err)
+		res.Errors = err.Error()
+		return nil
 	}
 
 	// Set the found messages to our response
 	res.Messages = string(msgBytes)
+
+	return nil
+}
+
+// DestroyByID is the handler for destroying a message by its ID
+func (m *Messaging) DestroyByID(
+	ctx context.Context,
+	req *proto_messaging.MessagingRequest,
+	res *proto_messaging.MessagingResponse,
+) error {
+	log.Log("Received Messaging.DestroyByID request")
+	ID := req.GetID()
+
+	// Destroy the record, catch errors and returning them early if there are any
+	if errs := m.Db.Where("ID = ?", ID).Delete(&db.Message{}).GetErrors(); len(errs) > 0 {
+		res.Errors = errSliceToString(errs)
+		return nil
+	}
+
+	// Respond with successful message deletion
+	res.Msg = fmt.Sprintf("Successfully destroyed message %d", ID)
 
 	return nil
 }
@@ -89,4 +118,14 @@ func (m *Messaging) PingPong(ctx context.Context, stream proto_messaging.Messagi
 			return err
 		}
 	}
+}
+
+// errSliceToString is a small helper function for now to join a slice of errors, which
+// is the type that is returned from a gorm db call with GetErrors() chained.
+func errSliceToString(errs []error) string {
+	var errStrings []string
+	for _, e := range errs {
+		errStrings = append(errStrings, e.Error())
+	}
+	return strings.Join(errStrings, ", ")
 }

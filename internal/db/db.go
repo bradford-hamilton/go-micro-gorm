@@ -59,7 +59,7 @@ func New() (*gorm.DB, error) {
 	return db, nil
 }
 
-// Seed the db with message records
+// Seed the db with a couple of each message type
 func seedDatabase(db *gorm.DB) {
 	db.Create(&Message{MsgType: "Public", Msg: "Hey, I'm a public message!"})
 	db.Create(&Message{MsgType: "Public", Msg: "I'm another public message."})

@@ -5,6 +5,7 @@ package proto.messaging;
 service MessagingService {
 	rpc Call(MessagingRequest) returns (MessagingResponse) {}
 	rpc List(MessagingListRequest) returns (MessagingListResponse) {}
+	rpc DestroyByID(MessagingRequest) returns (MessagingResponse) {}
 	rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
 	rpc PingPong(stream Ping) returns (stream Pong) {}
 }
@@ -14,11 +15,13 @@ message Message {
 }
 
 message MessagingRequest {
-	string name = 1;
+	int64 ID = 1;
+	string name = 2;
 }
 
 message MessagingResponse {
 	string msg = 1;
+	string errors = 2;
 }
 
 message MessagingListRequest {
@@ -27,6 +30,7 @@ message MessagingListRequest {
 
 message MessagingListResponse {
 	string messages = 1;
+	string errors = 2;
 }
 
 enum MessagingListType {

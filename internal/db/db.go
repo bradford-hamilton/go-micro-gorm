@@ -41,9 +41,8 @@ func New() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Check that our connection is good
-	err = db.DB().Ping()
-	if err != nil {
+	// Double check that our connection is good
+	if err = db.DB().Ping(); err != nil {
 		return nil, err
 	}
 

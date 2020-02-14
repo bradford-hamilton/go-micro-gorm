@@ -4,7 +4,7 @@ import (
 	"github.com/bradford-hamilton/go-micro-gorm/internal/db"
 	messaginghandler "github.com/bradford-hamilton/go-micro-gorm/internal/handlers/messaging_handler"
 	messagingsubscriber "github.com/bradford-hamilton/go-micro-gorm/internal/subscribers/messaging_subscriber"
-	proto_messaging "github.com/bradford-hamilton/go-micro-gorm/proto/messaging"
+	pb "github.com/bradford-hamilton/go-micro-gorm/proto/messaging"
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/util/log"
 )
@@ -26,17 +26,21 @@ func main() {
 	service.Init()
 
 	// Register Handler
-	proto_messaging.RegisterMessagingServiceHandler(
+	if err = pb.RegisterMessagingServiceHandler(
 		service.Server(),
 		&messaginghandler.Messaging{Db: db},
-	)
+	); err != nil {
+		log.Fatal(err)
+	}
 
 	// Register Messaging struct as subscriber
-	micro.RegisterSubscriber(
+	if err = micro.RegisterSubscriber(
 		"go.micro.srv.messaging",
 		service.Server(),
 		new(messagingsubscriber.Messaging),
-	)
+	); err != nil {
+		log.Fatal(err)
+	}
 
 	// Run the service
 	if err := service.Run(); err != nil {

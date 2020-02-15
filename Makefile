@@ -14,7 +14,7 @@ build-mac: proto
 
 .PHONY: build-linux
 build-linux: proto
-	CGO_ENABLED=0 GOOS=linux sudo go build -a -installsuffix cgo -ldflags '-w' -i -o go-micro-gorm ./main.go ./plugins.go
+	CGO_ENABLED=0 GOOS=linux go build -o go-micro-gorm ./main.go ./plugins.go
 
 .PHONY: test
 test:

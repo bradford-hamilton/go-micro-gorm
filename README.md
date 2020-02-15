@@ -79,6 +79,10 @@ kc get services
 kc get pods
 kc describe deployments
 kubectl describe pods {my-pod}
+
+RESTARTING A POD (scale down to 0 then back to 1):
+    kubectl scale deployment go-micro-gorm --replicas=0
+    kubectl scale deployment go-micro-gorm --replicas=1
 ```
 More: https://kubernetes.io/docs/reference/kubectl/cheatsheet
 

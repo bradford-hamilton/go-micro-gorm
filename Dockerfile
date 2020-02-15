@@ -1,3 +1,3 @@
 FROM ubuntu
-ADD go-micro-gorm /go-micro-gorm
-ENTRYPOINT [ "/go-micro-gorm --registry=etcd" ]
+COPY go-micro-gorm /go-micro-gorm
+ENTRYPOINT [ "/go-micro-gorm", "--registry=etcd" ]

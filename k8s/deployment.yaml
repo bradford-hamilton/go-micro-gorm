@@ -24,6 +24,20 @@ spec:
           - containerPort: 8080
             name: gmg-port
           env:
+          - name: GO_MICRO_GORM_PORT
+            value: "4000"
+          - name: GO_MICRO_GORM_DB_HOST
+            value: 10.0.2.2
+          - name: GO_MICRO_GORM_DB_PORT
+            value: "5432"
+          - name: GO_MICRO_GORM_DB_USER
+            value: bradford
+          - name: GO_MICRO_GORM_DB_PASSWORD
+            value:
+          - name: GO_MICRO_GORM_DB_NAME
+            value: go_micro_gorm_dev
+          - name: GO_MICRO_GORM_SSL_MODE
+            value: disable
           - name: MICRO_SERVER_ADDRESS
             value: "0.0.0.0:8080"
           - name: MICRO_BROKER

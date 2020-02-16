@@ -13,7 +13,7 @@ micro new github.com/bradford-hamilton/go-micro-gorm --namespace=go.micro --type
 
 ## Configuration
 
-- FQDN: go.micro.srv.messaging
+- FQDN: go.micro.srv.webapp
 - Type: srv
 - Alias: go
 
@@ -60,12 +60,12 @@ micro list services
 
 Call a service directly:
 ```
-micro call go.micro.srv.messaging Messaging.Call '{"name": "bradford"}'
+micro call go.micro.srv.webapp Messaging.Call '{"name": "bradford"}'
 ```
 
 Get health and endpoint IP:PORT for each service:
 ```
-micro health go.micro.srv.messaging
+micro health go.micro.srv.webapp
 ```
 
 Build and run service:

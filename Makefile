@@ -2,7 +2,7 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: run
 run:
-	GO_MICRO_GORM_ENV=development micro run service
+	cd cmd/go-micro-gorm && GO_MICRO_GORM_ENV=development micro run service
 
 .PHONY: proto
 proto:
@@ -10,15 +10,15 @@ proto:
 
 .PHONY: build-mac
 build-mac: proto
-	go build -o go-micro-gorm *.go
+	cd cmd/go-micro-gorm && go build -o go-micro-gorm *.go
 
 .PHONY: build-linux
 build-linux: proto
-	CGO_ENABLED=0 GOOS=linux go build -o go-micro-gorm ./main.go ./plugins.go
+	cd cmd/go-micro-gorm && CGO_ENABLED=0 GOOS=linux go build -o go-micro-gorm ./main.go ./plugins.go
 
 .PHONY: test
 test:
-	go test -v ./... -cover
+	go test -v -race -cover ./... | sed ''/PASS/s//$$(printf "\033[32mPASS\033[0m")/'' | sed ''/FAIL/s//$$(printf "\033[31mFAIL\033[0m")/''
 
 .PHONY: docker
 docker: build-linux

@@ -2,12 +2,16 @@ package main
 
 import (
 	"github.com/bradford-hamilton/go-micro-gorm/internal/db"
-	messaginghandler "github.com/bradford-hamilton/go-micro-gorm/internal/handlers/messaging_handler"
-	messagingsubscriber "github.com/bradford-hamilton/go-micro-gorm/internal/subscribers/messaging_subscriber"
-	pb "github.com/bradford-hamilton/go-micro-gorm/proto/messaging"
+	msginghandler "github.com/bradford-hamilton/go-micro-gorm/internal/handlers/messaging_handler"
+	userhandler "github.com/bradford-hamilton/go-micro-gorm/internal/handlers/user_handler"
+	msgingsubscriber "github.com/bradford-hamilton/go-micro-gorm/internal/subscribers/messaging_subscriber"
+	msgpb "github.com/bradford-hamilton/go-micro-gorm/proto/messaging"
+	userpb "github.com/bradford-hamilton/go-micro-gorm/proto/user"
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/util/log"
 )
+
+const serviceName = "go.micro.srv.webapp"
 
 func main() {
 	db, err := db.New()
@@ -18,27 +22,31 @@ func main() {
 
 	// Create new micro service
 	service := micro.NewService(
-		micro.Name("go.micro.srv.messaging"),
+		micro.Name(serviceName),
 		micro.Version("latest"),
 	)
 
 	// Initialize the service
 	service.Init()
 
-	// Register Handler
-	if err = pb.RegisterMessagingServiceHandler(
-		service.Server(),
-		&messaginghandler.Messaging{Db: db},
-	); err != nil {
+	// Register and attach the db to the handler for messaging service
+	msgHandler := msginghandler.Messaging{DB: db}
+	err = msgpb.RegisterMessagingServiceHandler(service.Server(), &msgHandler)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Register Messaging struct as subscriber
-	if err = micro.RegisterSubscriber(
-		"go.micro.srv.messaging",
-		service.Server(),
-		new(messagingsubscriber.Messaging),
-	); err != nil {
+	// Reigster and attach the db to the handler for user service
+	userHandler := userhandler.User{DB: db}
+	err = userpb.RegisterUserServiceHandler(service.Server(), &userHandler)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Register and attach the db to to the subscriber for msg subscription service
+	msgSubscriber := msgingsubscriber.Messaging{DB: db}
+	err = micro.RegisterSubscriber(serviceName, service.Server(), &msgSubscriber)
+	if err != nil {
 		log.Fatal(err)
 	}
 

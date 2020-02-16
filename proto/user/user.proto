@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package proto.user;
+
+service UserService {
+  rpc Create(Request) returns (Response) {}
+}
+
+message User {
+  int64 ID = 1;
+  string first_name = 2;
+  string last_name = 3;
+  bool mailing_list = 4;
+}
+
+message Request {
+  int64 ID = 1;
+  string first_name = 2;
+  string last_name = 3;
+  bool mailing_list = 4;
+}
+
+message Response {
+  string message = 1;
+  repeated string errors = 2;
+}

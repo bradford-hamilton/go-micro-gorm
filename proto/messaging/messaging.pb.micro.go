@@ -34,9 +34,9 @@ var _ server.Option
 // Client API for MessagingService service
 
 type MessagingService interface {
-	Call(ctx context.Context, in *MessagingRequest, opts ...client.CallOption) (*MessagingResponse, error)
-	List(ctx context.Context, in *MessagingListRequest, opts ...client.CallOption) (*MessagingListResponse, error)
-	DestroyByID(ctx context.Context, in *MessagingRequest, opts ...client.CallOption) (*MessagingResponse, error)
+	Call(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+	List(ctx context.Context, in *ListRequest, opts ...client.CallOption) (*ListResponse, error)
+	DestroyByID(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (MessagingService_StreamService, error)
 	PingPong(ctx context.Context, opts ...client.CallOption) (MessagingService_PingPongService, error)
 }
@@ -53,9 +53,9 @@ func NewMessagingService(name string, c client.Client) MessagingService {
 	}
 }
 
-func (c *messagingService) Call(ctx context.Context, in *MessagingRequest, opts ...client.CallOption) (*MessagingResponse, error) {
+func (c *messagingService) Call(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
 	req := c.c.NewRequest(c.name, "MessagingService.Call", in)
-	out := new(MessagingResponse)
+	out := new(Response)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -63,9 +63,9 @@ func (c *messagingService) Call(ctx context.Context, in *MessagingRequest, opts 
 	return out, nil
 }
 
-func (c *messagingService) List(ctx context.Context, in *MessagingListRequest, opts ...client.CallOption) (*MessagingListResponse, error) {
+func (c *messagingService) List(ctx context.Context, in *ListRequest, opts ...client.CallOption) (*ListResponse, error) {
 	req := c.c.NewRequest(c.name, "MessagingService.List", in)
-	out := new(MessagingListResponse)
+	out := new(ListResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -73,9 +73,9 @@ func (c *messagingService) List(ctx context.Context, in *MessagingListRequest, o
 	return out, nil
 }
 
-func (c *messagingService) DestroyByID(ctx context.Context, in *MessagingRequest, opts ...client.CallOption) (*MessagingResponse, error) {
+func (c *messagingService) DestroyByID(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
 	req := c.c.NewRequest(c.name, "MessagingService.DestroyByID", in)
-	out := new(MessagingResponse)
+	out := new(Response)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -186,18 +186,18 @@ func (x *messagingServicePingPong) Recv() (*Pong, error) {
 // Server API for MessagingService service
 
 type MessagingServiceHandler interface {
-	Call(context.Context, *MessagingRequest, *MessagingResponse) error
-	List(context.Context, *MessagingListRequest, *MessagingListResponse) error
-	DestroyByID(context.Context, *MessagingRequest, *MessagingResponse) error
+	Call(context.Context, *Request, *Response) error
+	List(context.Context, *ListRequest, *ListResponse) error
+	DestroyByID(context.Context, *Request, *Response) error
 	Stream(context.Context, *StreamingRequest, MessagingService_StreamStream) error
 	PingPong(context.Context, MessagingService_PingPongStream) error
 }
 
 func RegisterMessagingServiceHandler(s server.Server, hdlr MessagingServiceHandler, opts ...server.HandlerOption) error {
 	type messagingService interface {
-		Call(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error
-		List(ctx context.Context, in *MessagingListRequest, out *MessagingListResponse) error
-		DestroyByID(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error
+		Call(ctx context.Context, in *Request, out *Response) error
+		List(ctx context.Context, in *ListRequest, out *ListResponse) error
+		DestroyByID(ctx context.Context, in *Request, out *Response) error
 		Stream(ctx context.Context, stream server.Stream) error
 		PingPong(ctx context.Context, stream server.Stream) error
 	}
@@ -212,15 +212,15 @@ type messagingServiceHandler struct {
 	MessagingServiceHandler
 }
 
-func (h *messagingServiceHandler) Call(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error {
+func (h *messagingServiceHandler) Call(ctx context.Context, in *Request, out *Response) error {
 	return h.MessagingServiceHandler.Call(ctx, in, out)
 }
 
-func (h *messagingServiceHandler) List(ctx context.Context, in *MessagingListRequest, out *MessagingListResponse) error {
+func (h *messagingServiceHandler) List(ctx context.Context, in *ListRequest, out *ListResponse) error {
 	return h.MessagingServiceHandler.List(ctx, in, out)
 }
 
-func (h *messagingServiceHandler) DestroyByID(ctx context.Context, in *MessagingRequest, out *MessagingResponse) error {
+func (h *messagingServiceHandler) DestroyByID(ctx context.Context, in *Request, out *Response) error {
 	return h.MessagingServiceHandler.DestroyByID(ctx, in, out)
 }
 

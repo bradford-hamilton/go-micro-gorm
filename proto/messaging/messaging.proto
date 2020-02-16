@@ -3,9 +3,9 @@ syntax = "proto3";
 package proto.messaging;
 
 service MessagingService {
-	rpc Call(MessagingRequest) returns (MessagingResponse) {}
-	rpc List(MessagingListRequest) returns (MessagingListResponse) {}
-	rpc DestroyByID(MessagingRequest) returns (MessagingResponse) {}
+	rpc Call(Request) returns (Response) {}
+	rpc List(ListRequest) returns (ListResponse) {}
+	rpc DestroyByID(Request) returns (Response) {}
 	rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
 	rpc PingPong(stream Ping) returns (stream Pong) {}
 }
@@ -14,29 +14,28 @@ message Message {
 	string say = 1;
 }
 
-message MessagingRequest {
+message Request {
 	int64 ID = 1;
 	string name = 2;
 }
 
-message MessagingResponse {
+message Response {
 	string msg = 1;
 	string errors = 2;
 }
 
-message MessagingListRequest {
-	MessagingListType message_type = 1; 	
+message ListRequest {
+	enum MessagingListType {
+		Public = 0;
+		Private = 1;
+		Protected = 2;
+	}
+	MessagingListType message_type = 1;
 }
 
-message MessagingListResponse {
+message ListResponse {
 	string messages = 1;
 	string errors = 2;
-}
-
-enum MessagingListType {
-	Public = 0;
-	Private = 1;
-	Protected = 2;
 }
 
 message StreamingRequest {

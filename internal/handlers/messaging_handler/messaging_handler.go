@@ -18,14 +18,14 @@ type Messaging struct {
 }
 
 // Call is a single request handler called via client.Call or the generated client code
-func (m *Messaging) Call(ctx context.Context, req *pb.MessagingRequest, res *pb.MessagingResponse) error {
+func (m *Messaging) Call(ctx context.Context, req *pb.Request, res *pb.Response) error {
 	log.Log("Received Messaging.Call request")
 	res.Msg = fmt.Sprintf("Hey there %s", req.Name)
 	return nil
 }
 
 // List all messages - currently takes a "message_type" and filters by that enum
-func (m *Messaging) List(ctx context.Context, req *pb.MessagingListRequest, res *pb.MessagingListResponse) error {
+func (m *Messaging) List(ctx context.Context, req *pb.ListRequest, res *pb.ListResponse) error {
 	log.Log("Received Messaging.List request")
 
 	// Create a slice of db.Message for gorm to use
@@ -56,7 +56,7 @@ func (m *Messaging) List(ctx context.Context, req *pb.MessagingListRequest, res 
 }
 
 // DestroyByID is the handler for destroying a message by its ID
-func (m *Messaging) DestroyByID(ctx context.Context, req *pb.MessagingRequest, res *pb.MessagingResponse) error {
+func (m *Messaging) DestroyByID(ctx context.Context, req *pb.Request, res *pb.Response) error {
 	log.Log("Received Messaging.DestroyByID request")
 	ID := req.GetID()
 

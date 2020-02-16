@@ -3,7 +3,6 @@ package messaginghandler
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/bradford-hamilton/go-micro-gorm/internal/db"
 	"github.com/bradford-hamilton/go-micro-gorm/pkg/json"
@@ -14,7 +13,7 @@ import (
 
 // Messaging defines the struct to which we attach different handlers to
 type Messaging struct {
-	Db *gorm.DB
+	DB *gorm.DB
 }
 
 // Call is a single request handler called via client.Call or the generated client code
@@ -33,11 +32,11 @@ func (m *Messaging) List(ctx context.Context, req *pb.ListRequest, res *pb.ListR
 
 	// Query our db for any messages where MsgType == the request's asked MsgType
 	if errs := m.
-		Db.
+		DB.
 		Where(&db.Message{MsgType: req.GetMessageType().String()}).
 		Find(&Messages).
 		GetErrors(); len(errs) > 0 {
-		res.Errors = errSliceToString(errs)
+		res.Errors = db.ErrSliceToString(errs)
 		return nil
 	}
 
@@ -45,7 +44,7 @@ func (m *Messaging) List(ctx context.Context, req *pb.ListRequest, res *pb.ListR
 	msgBytes, err := json.API.Marshal(&Messages)
 	if err != nil {
 		log.Errorf("Error marshalling json in List endpoint: %v", err)
-		res.Errors = err.Error()
+		res.Errors = []string{err.Error()}
 		return nil
 	}
 
@@ -61,8 +60,8 @@ func (m *Messaging) DestroyByID(ctx context.Context, req *pb.Request, res *pb.Re
 	ID := req.GetID()
 
 	// Destroy the record, catch errors and return them early if there are any
-	if errs := m.Db.Where("ID = ?", ID).Delete(&db.Message{}).GetErrors(); len(errs) > 0 {
-		res.Errors = errSliceToString(errs)
+	if errs := m.DB.Where("ID = ?", ID).Delete(&db.Message{}).GetErrors(); len(errs) > 0 {
+		res.Errors = db.ErrSliceToString(errs)
 		return nil
 	}
 
@@ -100,14 +99,4 @@ func (m *Messaging) PingPong(ctx context.Context, stream pb.MessagingService_Pin
 			return err
 		}
 	}
-}
-
-// errSliceToString is a small helper function for now to join a slice of errors, which
-// is the type that is returned from a gorm GetErrors() call.
-func errSliceToString(errs []error) string {
-	var errStrings []string
-	for _, e := range errs {
-		errStrings = append(errStrings, e.Error())
-	}
-	return strings.Join(errStrings, ", ")
 }

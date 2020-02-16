@@ -21,7 +21,7 @@ message Request {
 
 message Response {
 	string msg = 1;
-	string errors = 2;
+	repeated string errors = 2;
 }
 
 message ListRequest {
@@ -35,7 +35,7 @@ message ListRequest {
 
 message ListResponse {
 	string messages = 1;
-	string errors = 2;
+	repeated string errors = 2;
 }
 
 message StreamingRequest {

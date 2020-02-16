@@ -4,11 +4,14 @@ import (
 	"context"
 
 	pb "github.com/bradford-hamilton/go-micro-gorm/proto/messaging"
+	"github.com/jinzhu/gorm"
 	"github.com/micro/go-micro/v2/util/log"
 )
 
 // Messaging defines the struct to which we attach different handlers to
-type Messaging struct{}
+type Messaging struct {
+	DB *gorm.DB
+}
 
 // Handle message publish
 func (m *Messaging) Handle(ctx context.Context, msg *pb.Message) error {

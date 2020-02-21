@@ -35,6 +35,7 @@ var _ server.Option
 
 type UserService interface {
 	Create(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (UserService_StreamService, error)
 }
 
 type userService struct {
@@ -59,15 +60,66 @@ func (c *userService) Create(ctx context.Context, in *Request, opts ...client.Ca
 	return out, nil
 }
 
+func (c *userService) Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (UserService_StreamService, error) {
+	req := c.c.NewRequest(c.name, "UserService.Stream", &StreamingRequest{})
+	stream, err := c.c.Stream(ctx, req, opts...)
+	if err != nil {
+		return nil, err
+	}
+	if err := stream.Send(in); err != nil {
+		return nil, err
+	}
+	return &userServiceStream{stream}, nil
+}
+
+type UserService_StreamService interface {
+	Context() context.Context
+	SendMsg(interface{}) error
+	RecvMsg(interface{}) error
+	Close() error
+	Recv() (*StreamingResponse, error)
+}
+
+type userServiceStream struct {
+	stream client.Stream
+}
+
+func (x *userServiceStream) Close() error {
+	return x.stream.Close()
+}
+
+func (x *userServiceStream) Context() context.Context {
+	return x.stream.Context()
+}
+
+func (x *userServiceStream) SendMsg(m interface{}) error {
+	return x.stream.Send(m)
+}
+
+func (x *userServiceStream) RecvMsg(m interface{}) error {
+	return x.stream.Recv(m)
+}
+
+func (x *userServiceStream) Recv() (*StreamingResponse, error) {
+	m := new(StreamingResponse)
+	err := x.stream.Recv(m)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // Server API for UserService service
 
 type UserServiceHandler interface {
 	Create(context.Context, *Request, *Response) error
+	Stream(context.Context, *StreamingRequest, UserService_StreamStream) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
 	type userService interface {
 		Create(ctx context.Context, in *Request, out *Response) error
+		Stream(ctx context.Context, stream server.Stream) error
 	}
 	type UserService struct {
 		userService
@@ -82,4 +134,44 @@ type userServiceHandler struct {
 
 func (h *userServiceHandler) Create(ctx context.Context, in *Request, out *Response) error {
 	return h.UserServiceHandler.Create(ctx, in, out)
+}
+
+func (h *userServiceHandler) Stream(ctx context.Context, stream server.Stream) error {
+	m := new(StreamingRequest)
+	if err := stream.Recv(m); err != nil {
+		return err
+	}
+	return h.UserServiceHandler.Stream(ctx, m, &userServiceStreamStream{stream})
+}
+
+type UserService_StreamStream interface {
+	Context() context.Context
+	SendMsg(interface{}) error
+	RecvMsg(interface{}) error
+	Close() error
+	Send(*StreamingResponse) error
+}
+
+type userServiceStreamStream struct {
+	stream server.Stream
+}
+
+func (x *userServiceStreamStream) Close() error {
+	return x.stream.Close()
+}
+
+func (x *userServiceStreamStream) Context() context.Context {
+	return x.stream.Context()
+}
+
+func (x *userServiceStreamStream) SendMsg(m interface{}) error {
+	return x.stream.Send(m)
+}
+
+func (x *userServiceStreamStream) RecvMsg(m interface{}) error {
+	return x.stream.Recv(m)
+}
+
+func (x *userServiceStreamStream) Send(m *StreamingResponse) error {
+	return x.stream.Send(m)
 }
